@@ -5,10 +5,13 @@ Node.js + Express 后台应用，支持 JWT 认证。
 ## 快速开始
 
 1. 安装依赖：
+
     ```bash
     npm install
     ```
+
 2. 启动服务：
+
     ```bash
     npm run dev
     ```
@@ -34,3 +37,13 @@ Node.js + Express 后台应用，支持 JWT 认证。
 ---
 
 如需持久化存储，请自行接入数据库。
+
+- concurrently 可以同时运行多个命令，并且能保持进程活跃，适合开发环境。
+- redis-server 用于启动 Redis 服务，提供缓存和消息队列功能。
+- concurrently 用于同时运行多个命令，例如同时启动 Redis 和 Node.js 服务。
+- nodemon 用于在开发环境中自动重启 Node.js 服务，提高开发效率。
+- servers 用于启动 Node.js 服务。
+- devRedis 用于在开发环境中启动 Redis 服务。
+- start 用于同时启动 Redis 和 Node.js 服务。
+- dev 用于在开发环境中启动 Node.js 服务。
+- redis 用于在开发环境中启动 Redis 服务。

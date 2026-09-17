@@ -4,9 +4,10 @@
 	"description": "Node.js + Express 后台应用，支持 JWT 认证。",
 	"main": "server.js",
 	"scripts": {
-		"start": "node server.js",
-		"dev": "nodemon server.js",
-		"format": "prettier --write ."
+		"dev": "concurrently \"npm run redis\" \"npm run start\"",
+		"start": "nodemon server.js",
+		"format": "prettier --write .",
+		"redis": "redis-server"
 	},
 	"keywords": [
 		"express",
@@ -30,6 +31,7 @@
 		"redis": "^5.12.1"
 	},
 	"devDependencies": {
+		"concurrently": "^9.2.4",
 		"nodemon": "^3.1.14"
 	}
 }
