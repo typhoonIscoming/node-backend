@@ -109,3 +109,32 @@ exports.login = async (req, res) => {
 		return res.status(500).json({ message: '登录失败', error: error.message }); // 返回 500 错误信息
 	}
 };
+
+exports.userInfo = async (req, res) => {
+	console.log('userInfo', req);
+	const userFromToken = req.user || {};
+	const username = userFromToken.name || userFromToken.username;
+
+	if (!username) {
+		return res.status(401).json({ message: 'token 无效或未登录' });
+	}
+
+	try {
+		const user = await findUserByName(username);
+		if (!user) {
+			return res.status(404).json({ message: '用户不存在' });
+		}
+
+		return res.json({
+			message: '获取用户信息成功',
+			user: {
+				id: user.id,
+				name: user.name,
+				age: user.age,
+			},
+		});
+	} catch (error) {
+		console.error('userInfo error:', error);
+		return res.status(500).json({ message: '获取用户信息失败', error: error.message });
+	}
+};
