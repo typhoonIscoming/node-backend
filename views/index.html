@@ -1,97 +1,177 @@
 <!doctype html>
 <html>
 	<head>
-		<title>Lightweight Charts 示例</title>
+		<title>XAU/USDT 大盘</title>
 		<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 		<style>
 			* {
 				margin: 0;
 				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+				color: #e5eefb;
+			}
+			.market-panel {
+				max-width: 1200px;
+				margin: 24px auto;
+				padding: 20px 24px;
+				background: rgba(15, 23, 42, 0.9);
+				border: 1px solid rgba(148, 163, 184, 0.2);
+				border-radius: 16px;
+				box-shadow: 0 25px 50px rgba(15, 23, 42, 0.35);
+			}
+			.market-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				gap: 16px;
+				margin-bottom: 16px;
+			}
+			.symbol-block {
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+			.symbol {
+				font-size: 28px;
+				font-weight: 700;
+				letter-spacing: 0.04em;
+			}
+			.name {
+				font-size: 14px;
+				color: #94a3b8;
+			}
+			.price-block {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-end;
+			}
+			.price-label {
+				font-size: 12px;
+				color: #94a3b8;
+				margin-bottom: 4px;
+			}
+			.price {
+				font-size: 42px;
+				font-weight: 700;
+				line-height: 1;
+			}
+			.price-change {
+				margin-top: 8px;
+				font-size: 16px;
+				font-weight: 600;
+				padding: 6px 10px;
+				border-radius: 999px;
+			}
+			.price.up,
+			.price-change.up {
+				color: #34d399;
+			}
+			.price.down,
+			.price-change.down {
+				color: #f87171;
+			}
+			.market-stats {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 16px;
+				margin-bottom: 12px;
+				color: #cbd5e1;
+				font-size: 14px;
+			}
+			.market-stats span {
+				display: inline-flex;
+				gap: 6px;
+				align-items: center;
+			}
+			.market-stats strong {
+				color: #f8fafc;
+				font-weight: 600;
+			}
+			.chart-toolbar {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin: 14px 0 12px;
+			}
+			.chart-type-btn {
+				padding: 8px 12px;
+				border: 1px solid rgba(148, 163, 184, 0.25);
+				background: rgba(30, 41, 59, 0.8);
+				color: #e2e8f0;
+				border-radius: 999px;
+				cursor: pointer;
+				font-size: 13px;
+				transition: all 0.2s ease;
+			}
+			.chart-type-btn:hover {
+				border-color: rgba(96, 165, 250, 0.7);
+			}
+			.chart-type-btn.active {
+				background: linear-gradient(135deg, #2563eb, #0ea5e9);
+				border-color: transparent;
+				color: white;
+				box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 			}
 			#chart {
 				width: 100%;
-				height: 500px;
+				height: 460px;
+				border-radius: 12px;
+				overflow: hidden;
+				background: #0f172a;
+			}
+			@media (max-width: 640px) {
+				.market-panel {
+					padding: 16px;
+				}
+				.market-header {
+					flex-direction: column;
+					align-items: stretch;
+				}
+				.price-block {
+					align-items: flex-start;
+				}
+				.price {
+					font-size: 32px;
+				}
 			}
 		</style>
 	</head>
 	<body>
-		<div id="chart"></div>
-		<button id="addBtn">添加一根新K线</button>
+		<div class="market-panel">
+			<div class="market-header">
+				<div class="symbol-block">
+					<div class="symbol">XAU/USDT</div>
+					<div class="name">黄金 / 美元</div>
+				</div>
+				<div class="price-block">
+					<div class="price-label">最新价</div>
+					<div id="lastPrice" class="price up">--</div>
+					<div id="priceChange" class="price-change up">--</div>
+				</div>
+			</div>
 
-		<script>
-			// 1. 创建图表实例
-			const chart = LightweightCharts.createChart(document.getElementById('chart'), {
-				layout: { background: { color: '#1e293b' }, textColor: '#e2e8f0' },
-				grid: { vertLines: { color: '#334155' }, horzLines: { color: '#334155' } },
-				timeScale: { timeVisible: true, secondsVisible: false },
-			});
+			<div class="market-stats">
+				<span>开盘 <strong id="openPrice">--</strong></span>
+				<span>最高 <strong id="highPrice">--</strong></span>
+				<span>最低 <strong id="lowPrice">--</strong></span>
+				<span>成交量 <strong id="volume">--</strong></span>
+			</div>
 
-			// 2. 添加 K 线系列
-			const candlestickSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
-				upColor: '#26a69a',
-				downColor: '#ef5350',
-				borderVisible: false,
-			});
+			<div class="chart-toolbar" aria-label="Chart type selector">
+				<button class="chart-type-btn active" data-chart-type="candlestick">K线图</button>
+				<button class="chart-type-btn" data-chart-type="area">美国线</button>
+				<button class="chart-type-btn" data-chart-type="line">折线图</button>
+				<button class="chart-type-btn" data-chart-type="hollow">空心图</button>
+				<button class="chart-type-btn" data-chart-type="baseline">基准线</button>
+			</div>
 
-			// 3. 添加成交量直方图系列
-			const volumeSeries = chart.addSeries(LightweightCharts.HistogramSeries, {
-				priceFormat: { type: 'volume' },
-				priceScaleId: 'volume', // 使用独立的坐标轴，避免挤压K线
-			});
+			<div id="chart"></div>
+		</div>
 
-			// 4. 生成模拟数据并设置
-			const mockData = [];
-			for (let i = 30; i >= 0; i--) {
-				const time = new Date(Date.now() - i * 24 * 60 * 60 * 1000); // 过去的小时
-				const open = 2000 + Math.random() * 100;
-				const close = open + (Math.random() - 0.5) * 50;
-				mockData.push({
-					time: time.toISOString().slice(0, 10),
-					open: open,
-					high: Math.max(open, close) + Math.random() * 20,
-					low: Math.min(open, close) - Math.random() * 20,
-					close: close,
-				});
-			}
-			console.log('mockData', mockData);
-			candlestickSeries.setData(mockData);
-			// volumeSeries.setData(
-			// 	mockData.map((d) => ({
-			// 		time: d.time,
-			// 		value: Math.random() * 10000,
-			// 		color: d.close >= d.open ? 'rgba(38, 166, 154, 0.5)' : 'rgba(239, 83, 80, 0.5)',
-			// 	}))
-			// );
-
-			// 5. 模拟实时更新
-			document.getElementById('addBtn').addEventListener('click', () => {
-				const last = mockData[mockData.length - 1];
-				const newTime = new Date(new Date(last.time).getTime() + 60 * 60 * 1000)
-					.toISOString()
-					.slice(0, 10);
-				console.log('newTime', newTime);
-				const newClose = last.close + (Math.random() - 0.5) * 30;
-
-				const newCandle = {
-					time: newTime,
-					open: last.close,
-					high: Math.max(last.close, newClose) + Math.random() * 10,
-					low: Math.min(last.close, newClose) - Math.random() * 10,
-					close: newClose,
-				};
-
-				mockData.push(newCandle);
-				// 关键：使用 update 方法，性能远优于重新 setData
-				candlestickSeries.update(newCandle);
-				volumeSeries.update({
-					time: newTime,
-					value: Math.random() * 10000,
-					color:
-						newCandle.close >= newCandle.open
-							? 'rgba(38, 166, 154, 0.5)'
-							: 'rgba(239, 83, 80, 0.5)',
-				});
-			});
-		</script>
+		<script src="/chart.js"></script>
 	</body>
 </html>
